@@ -53,3 +53,23 @@ Feature: Install the Gem in a Rails application
     And I uninstall the "hoptoad_notifier" gem
     And I run "cap -T"
     Then I should see "deploy:notify_hoptoad"
+
+  Scenario: Rescue an exception in a controller
+    When I generate a new Rails application
+    And I configure the Hoptoad shim
+    And I configure my application to require the "hoptoad_notifier" gem
+    And I run "script/generate hoptoad -k myapikey"
+    And I define a response for "TestController#index":
+      """
+      session[:value] = "test"
+      raise RuntimeError, "some message"
+      """
+    And I perform a request to "http://example.com:123/test/index?param=value"
+    Then I should receive the following Hoptoad notification:
+      | component     | test                                          |
+      | action        | index                                         |
+      | error message | RuntimeError: some message                    |
+      | error class   | RuntimeError                                  |
+      | session       | value: test                                   |
+      | parameters    | param: value                                  |
+      | url           | http://example.com:123/test/index?param=value |
