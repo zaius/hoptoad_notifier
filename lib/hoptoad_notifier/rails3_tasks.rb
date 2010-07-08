@@ -77,7 +77,7 @@ namespace :hoptoad do
     end
     class HoptoadVerificationController < ApplicationController; end
 
-    Rails::Application.routes_reloader.reload_if_changed
+    Rails::Application.routes_reloader.execute_if_updated
     Rails::Application.routes.draw do |map|
       match 'verify' => 'application#verify', :as => 'verify'
     end
