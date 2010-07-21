@@ -9,9 +9,10 @@ Gem::Specification.new do |s|
   s.version     = HoptoadNotifier::VERSION
   s.summary     = %q{Send your application errors to our hosted service and reclaim your inbox.}
 
-  s.files        = FileList['[A-Z]*', 'generators/**/*.*', 'lib/**/*.rb',
-                            'test/**/*.rb', 'rails/**/*.rb', 'script/*',
-                            'lib/templates/*.erb']
+  s.files        = ['[A-Z]*', 'generators/**/*.*', 'lib/**/*.rb',
+                    'test/**/*.rb', 'rails/**/*.rb', 'script/*',
+                    'lib/templates/*.erb'].map { |glob| Dir.glob(glob) }.flatten
+  
   s.require_path = 'lib'
   s.test_files   = Dir[*['test/**/*_test.rb']]
 
