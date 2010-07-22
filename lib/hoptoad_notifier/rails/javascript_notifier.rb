@@ -11,7 +11,7 @@ module HoptoadNotifier
         return unless HoptoadNotifier.configuration.js_notifier
 
         path = File.join(File.dirname(__FILE__), '..', '..', 'templates', 'javascript_notifier.erb')
-        host = HoptoadNotifier.configuration.host
+        host = HoptoadNotifier.configuration.host.dup
         port = HoptoadNotifier.configuration.port
         host << ":#{port}" unless port == 80
 
