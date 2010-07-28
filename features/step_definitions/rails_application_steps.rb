@@ -195,15 +195,43 @@ When /^I define a response for "([^\"]*)":$/ do |controller_and_action, definiti
 end
 
 When /^I perform a request to "([^\"]*)"$/ do |uri|
-  if rails_uses_rack?
+  if rails3?
     request_script = <<-SCRIPT
       require 'config/environment'
-      env = Rack::MockRequest.env_for(#{uri.inspect})
-      RailsRoot::Application.call(env)
+
+      env      = Rack::MockRequest.env_for(#{uri.inspect})
+      response = RailsRoot::Application.call(env).last
+
+      if response.is_a?(Array)
+        puts response.join
+      else
+        puts response.body
+      end
     SCRIPT
     File.open(File.join(RAILS_ROOT, 'request.rb'), 'w') { |file| file.write(request_script) }
     @terminal.cd(RAILS_ROOT)
     @terminal.run("./script/rails runner -e production request.rb")
+  elsif rails_uses_rack?
+    request_script = <<-SCRIPT
+      require 'config/environment'
+
+      env = Rack::MockRequest.env_for(#{uri.inspect})
+      app = Rack::Lint.new(ActionController::Dispatcher.new)
+
+      status, headers, body = app.call(env)
+
+      response = ""
+      if body.respond_to?(:to_str)
+        response << body
+      else
+        body.each { |part| response << part }
+      end
+
+      puts response
+    SCRIPT
+    File.open(File.join(RAILS_ROOT, 'request.rb'), 'w') { |file| file.write(request_script) }
+    @terminal.cd(RAILS_ROOT)
+    @terminal.run("./script/runner -e production request.rb")
   else
     uri = URI.parse(uri)
     request_script = <<-SCRIPT
